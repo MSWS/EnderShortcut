@@ -1,0 +1,14 @@
+name: EnderShortcut
+description: Adds a balanced /ec command.
+version: 1.0
+api-version: 1.20
+author: MSWS
+main: xyz.msws.endershortcut.EnderShortcut
+commands:
+  enderchest:
+    description: Opens your enderchest
+    usage: /<command>
+    permission: endershortcut.enderchest
+    aliases:
+      - ec
+      - echest
