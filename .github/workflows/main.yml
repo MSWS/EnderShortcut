@@ -23,3 +23,9 @@ jobs:
 
       - name: Build and Test with Maven
         run: mvn clean package
+
+      - name: Upload JAR Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: EnderShortcut  # Change this to your desired artifact name
+          path: target/*.jar      # Adjust the path to match your JAR location
