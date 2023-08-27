@@ -18,6 +18,9 @@ public class EnderShortcut extends JavaPlugin {
     }
 
     private void generateFiles() {
+        File parent = this.getDataFolder();
+        if (!parent.exists())
+            parent.mkdirs();
         File langFile = new File(this.getDataFolder(), "lang.yml");
         try {
             if (langFile.createNewFile())
