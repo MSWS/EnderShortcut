@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-java@v2
         with:
           distribution: 'oracle'
-          java-version: 17
+          java-version: '17'
 
       - name: Cache Maven packages
         uses: actions/cache@v2
@@ -35,10 +35,19 @@ jobs:
 
       - name: Create GitHub Release
         id: create_release
-        uses: gh-actions/github-release@master
+        uses: actions/create-release@v1
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/EnderShortcut.jar
-          tag: ${{ steps.get_version.outputs.VERSION }}
-          title: Release ${{ steps.get_version.outputs.VERSION }}
-          note: Release of version ${{ steps.get_version.outputs.VERSION }}
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          release_name: Release ${{ steps.get_version.outputs.VERSION }}
+          body: Release of version ${{ steps.get_version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload_release_asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./target/EnderShortcut.jar
+          asset_name: EnderShortcut.jar
+          asset_content_type: application/java-archive
