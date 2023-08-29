@@ -58,21 +58,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           release_title="Release $(date +'%Y-%m-%d %H:%M:%S')"
-          release_notes=$(git log --pretty=format:"- %s%n" ${{ steps.get_version.outputs.version }}..HEAD)
+          project_version=${{ steps.get_version.outputs.version }}
           
           echo "Creating release with title: $release_title"
-          echo "Release notes:"
-          echo "$release_notes"
           
           # Create the release using GitHub API
           response=$(curl -s --request POST \
             --url "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" \
             --header "Authorization: Bearer ${GITHUB_TOKEN}" \
             --data '{
-              "tag_name": "'"${{ steps.get_version.outputs.version }}"'",
+              "tag_name": "'"${project_version}"'",
               "target_commitish": "main",
               "name": "'"${release_title}"'",
-              "body": "'"${release_notes}"'",
               "draft": false,
               "prerelease": false
             }')
