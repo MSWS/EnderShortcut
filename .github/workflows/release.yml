@@ -23,6 +23,11 @@ jobs:
       - name: Build Jar
         run: mvn clean package
 
+      - name: Upload Jar Asset
+        uses: actions/upload-artifact@v2
+        with:
+          name: EnderShortcut
+          path: target/*.jar
   release:
     name: Create Release
     needs: build
@@ -44,12 +49,6 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
-
-      - name: Upload Jar Asset
-        uses: actions/upload-artifact@v2
-        with:
-          name: EnderShortcut
-          path: target/*.jar
 
       - name: Get Release ID
         id: get_release_id
