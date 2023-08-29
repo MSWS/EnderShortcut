@@ -14,7 +14,8 @@ public enum Lang {
     MUST_BE_PLAYER("MustBePlayer", "%prefix% You must be a player to run this command."),
     MUST_HAVE_ENDERCHEST("MustHaveEnderchest", "%prefix% You must have an enderchest in your inventory to run this command."),
     MUST_HAVE_EITHER("MustHaveEither", "%prefix% You must have either an eye of ender or a silk touch pickaxe to run this command."),
-    CONSUMED_EYE("ConsumedEye", "%prefix% You consumed an eye of ender to open your enderchest.");
+    CONSUMED_EYE("ConsumedEye", "%prefix% You consumed an eye of ender to open your enderchest."),
+    ITEM_CTRL_CLICK("ItemCtrlClick", "&7Right-Click to open.");
 
     private final String key;
     private final Object def;

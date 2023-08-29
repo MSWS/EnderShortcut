@@ -1,5 +1,6 @@
 package xyz.msws.endershortcut.commands;
 
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.command.Command;
@@ -45,6 +46,9 @@ public class EnderChestCommand implements CommandExecutor {
             Lang.MUST_BE_PLAYER.send(sender);
             return false;
         }
+
+        if (player.getGameMode() == GameMode.CREATIVE)
+            return true;
 
         if (!player.getInventory().contains(Material.ENDER_CHEST) && !sender.hasPermission("endershortcut.bypass.chest")) {
             Lang.MUST_HAVE_ENDERCHEST.send(player);
