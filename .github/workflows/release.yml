@@ -41,19 +41,17 @@ jobs:
       - name: Check if release exists
         id: check_release
         run: |
-          RELEASE_ID=$(curl --silent \
-                            --header "Authorization: Bearer ${{ env.GITHUB_TOKEN }}" \
-                            --url "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.VERSION }}" \
-                            --fail \
-                            --write-out "%{http_code}" \
-                            --output /dev/null)
-          if [[ "$RELEASE_ID" == "200" ]]; then
+          HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}\n" \
+                          -H "Authorization: Bearer ${{ env.GITHUB_TOKEN }}" \
+                          "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.VERSION }}")
+          if [[ "$HTTP_CODE" -eq 200 ]]; then
             echo "Release already exists, skipping..."
             echo "RELEASE_EXISTS=true" >> $GITHUB_ENV
           else
             echo "Release does not exist, creating..."
             echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
           fi
+
 
       - name: Create GitHub Release
         id: create_release
