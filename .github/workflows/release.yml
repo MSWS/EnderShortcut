@@ -77,3 +77,14 @@ jobs:
             }')
           
           echo "Release response: $response"
+          jar_filename="target/EnderShortcut-${project_version}.jar"
+          echo "Uploading JAR asset: $jar_filename"
+  
+          upload_url=$(echo "$response" | jq -r '.upload_url' | sed -e 's/{?name,label}//')
+          curl -s -X POST \
+          --url "$upload_url?name=${jar_filename}" \
+          --header "Authorization: Bearer ${GITHUB_TOKEN}" \
+          --header "Content-Type: $(file -b --mime-type $jar_filename)" \
+          --data-binary "@$jar_filename"
+  
+          echo "JAR asset uploaded"
