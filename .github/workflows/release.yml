@@ -46,12 +46,13 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+      - name: List files in target directory
+        run: ls -l ./target
       - name: Upload Release Asset
         id: upload_release_asset
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /target/EnderShortcut.jar
+          asset_path: ./target/EnderShortcut.jar
           asset_name: EnderShortcut.jar
           asset_content_type: application/java-archive
