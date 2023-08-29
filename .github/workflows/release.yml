@@ -30,8 +30,14 @@ jobs:
 
       - name: Generate release notes
         run: |
-          NOTES=$(git log --pretty=format:'- %s' $LATEST_SHA..HEAD)
-          echo "NOTES=$NOTES" >> $GITHUB_ENV
+          if git merge-base --is-ancestor $LATEST_SHA HEAD; then
+            NOTES=$(git log --pretty=format:'- %s' $LATEST_SHA..HEAD)
+            NOTES_BASE64=$(echo "$NOTES" | base64)
+          else
+            NOTES="No changes since the last release or SHA not in history."
+            NOTES_BASE64=$(echo "$NOTES" | base64)
+          fi
+          echo "NOTES_BASE64=$NOTES_BASE64" >> $GITHUB_ENV
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -76,7 +82,7 @@ jobs:
           release_name: ${{ env.VERSION }}
 #          body: Release of version ${{ env.VERSION }}
           body: |
-            ${{ env.NOTES }}
+            $(echo "$NOTES_BASE64" | base64 --decode)
           draft: false
           prerelease: false
 
