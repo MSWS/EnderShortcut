@@ -1,0 +1,79 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build JAR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+
+      - name: Build JAR
+        run: mvn package
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Git credentials
+        run: git config --global user.email "actions@example.com" && git config --global user.name "GitHub Actions"
+
+      - name: Get Maven Project Version
+        id: get_version
+        run: echo "::set-output name=version::$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+
+      - name: Determine if release needs to be created
+        id: check_release
+        run: |
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          project_version=${{ steps.get_version.outputs.version }}
+          
+          if [ "$latest_tag" != "$project_version" ]; then
+            echo "::set-output name=should_create_release::true"
+          else
+            echo "::set-output name=should_create_release::false"
+          fi
+
+      - name: Create GitHub Release
+        if: steps.check_release.outputs.should_create_release == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          release_title="Release $(date +'%Y-%m-%d %H:%M:%S')"
+          release_notes=$(git log --pretty=format:"- %s%n" ${{ steps.get_version.outputs.version }}..HEAD)
+          
+          echo "Creating release with title: $release_title"
+          echo "Release notes:"
+          echo "$release_notes"
+          
+          # Create the release using GitHub API
+          response=$(curl -s --request POST \
+            --url "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" \
+            --header "Authorization: Bearer ${GITHUB_TOKEN}" \
+            --data '{
+              "tag_name": "'"${{ steps.get_version.outputs.version }}"'",
+              "target_commitish": "main",
+              "name": "'"${release_title}"'",
+              "body": "'"${release_notes}"'",
+              "draft": false,
+              "prerelease": false
+            }')
+          
+          echo "Release response: $response"

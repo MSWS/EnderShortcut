@@ -1,6 +1,6 @@
 name: EnderShortcut
 description: Adds a balanced /ec command.
-version: 1.0
+version: "${project.version}"
 api-version: 1.20
 author: MSWS
 main: xyz.msws.endershortcut.EnderShortcut
