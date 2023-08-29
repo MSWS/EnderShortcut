@@ -24,6 +24,7 @@ public class EnderOpenListener implements Listener {
     public void onOpen(InventoryOpenEvent event) {
         HumanEntity player = event.getPlayer();
         if (event.getView().getType() != InventoryType.ENDER_CHEST) return;
+        if (!player.hasPermission("endershortcut.shulker")) return;
         if (openingOriginalInventory.contains(player.getUniqueId())) return;
         EnderView view = new EnderView(plugin, player.getEnderChest());
         openingOriginalInventory.add(player.getUniqueId());

@@ -27,6 +27,10 @@ import xyz.msws.endershortcut.utils.Lang;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Represents a modified view of a player's enderchest.
+ * Used to lore-ize shulker boxes and allow them to be opened by right clicking.
+ */
 public class EnderView implements Listener {
     private final Inventory baseInv, modifiedInv;
     private final NamespacedKey key;
@@ -67,12 +71,10 @@ public class EnderView implements Listener {
         Inventory clicked = event.getClickedInventory();
         HumanEntity player = event.getWhoClicked();
         ItemStack item = event.getCurrentItem();
-        if (!isTagged(item))
-            return;
+        if (!isTagged(item)) return;
         ItemMeta meta = item.getItemMeta();
         BlockStateMeta bsm = (BlockStateMeta) meta;
-        if (!(bsm.getBlockState() instanceof ShulkerBox shulker))
-            return;
+        if (!(bsm.getBlockState() instanceof ShulkerBox shulker)) return;
         player.openInventory(shulker.getInventory());
         new ShulkerLinkListener(plugin, item, player, event.getSlot());
     }

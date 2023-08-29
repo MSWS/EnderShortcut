@@ -27,3 +27,4 @@ Ender Chest in their inventory to use the command.
 | `endershortcut.bypass.chest`   | Grants access to the `enderchest` command even if the player does not have an Ender Chest.   |
 | `endershortcut.bypass.anysilk` | Grants access to the `enderchest` command if any item the player's inventory has silk touch. | 
 | `endershortcut.bypass.item`    | Grants access to the `enderchest` command even if the player does not have a required item.  |
+| `endershortcut.shulker`        | Grants access to open shulker boxes within their enderchest.                                 |   
