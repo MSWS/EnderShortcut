@@ -8,16 +8,26 @@ Aliases: `/ec`, `/echest`
 
 ### Functionality
 
-EnderShortcut aims to allow players to simply use `/enderchest` instead of having to **place down** their chest,
-interact with it, and then pick it back up. This is a _balanced_ shortcut because it requires the player to have an
-Ender Chest in their inventory to use the command.
+EnderShortcut adds some quality of life features with players' enderchests.
+
+### Opening (/ec)
+
+Players can easily open their enderchest if they have the required tools in their inventory.
+This saves players from having to place down, interact with, break, and pick up their enderchest.
 
 1. The player must have the `endershortcut.enderchest` permission.
-2. The player must have an Ender Chest in their inventory. (unless they have the `endershortcut.enderchest.bypasschest`
+2. The player must have an Ender Chest in their inventory. (unless they have the `endershortcut.bypass.chest`
    permission).
-3. The player must have either a **silk touch pickaxe** or an **eye of ender** in their inventory.
+3. The player must have either a **silk touch pickaxe** or an **eye of ender** in their inventory (or
+   have `endershortcut.bypass.item`).
 4. Access is granted to the player's Ender Chest.
 5. If an eye of ender was used, it is consumed.
+
+### Shulker Boxes
+
+Players can easily open the shulker boxes inside their enderchest by right-clicking on the boxes.
+This saves players from having to place down, interact with, break, pick up their shulker boxes, and placing them back
+in their enderchest. (Requires `endershortcut.shulker` permissions).
 
 ## Permissions
 

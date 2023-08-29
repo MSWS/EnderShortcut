@@ -13,11 +13,14 @@ import org.bukkit.plugin.Plugin;
 
 /**
  * Responsible for linking a shulker box item to the player's inventory when editing that item.
+ * Automatically registers itself upon initialization and unregisters itself when the inventory is closed.
  */
 public class ShulkerLinkListener implements Listener {
     private final ItemStack item;
     private final ShulkerBox shulker;
     private final HumanEntity player;
+
+    // The original slot of the shulker box in the player's enderchest inventory.
     private final int slot;
 
     public ShulkerLinkListener(Plugin plugin, ItemStack item, HumanEntity player, int slot) {
@@ -45,6 +48,8 @@ public class ShulkerLinkListener implements Listener {
         BlockStateMeta bsm = (BlockStateMeta) meta;
         bsm.setBlockState(shulker);
         item.setItemMeta(bsm);
+
+        // We've updated the item, so we need to re-insert it into the player's enderchest
         player.getEnderChest().setItem(slot, item);
         player.openInventory(player.getEnderChest());
     }

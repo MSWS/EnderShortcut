@@ -30,12 +30,23 @@ import java.util.List;
 /**
  * Represents a modified view of a player's enderchest.
  * Used to lore-ize shulker boxes and allow them to be opened by right clicking.
+ * Automatically registers listeners upon initialization and unregisters listeners when the inventory is closed.
  */
 public class EnderView implements Listener {
     private final Inventory baseInv, modifiedInv;
+
+    /**
+     * Used to identify shulker boxes that have been modified by this plugin.
+     */
     private final NamespacedKey key;
     private final Plugin plugin;
 
+    /**
+     * Creates a new EnderView.
+     *
+     * @param plugin  The plugin to register listeners to.
+     * @param baseInv The player's enderchest inventory.
+     */
     public EnderView(Plugin plugin, Inventory baseInv) {
         this.plugin = plugin;
         this.baseInv = baseInv;
@@ -49,6 +60,7 @@ public class EnderView implements Listener {
 
     @EventHandler
     public void onDrop(PlayerDropItemEvent event) {
+        // Dropping an item directly from the enderchest
         Item item = event.getItemDrop();
         ItemStack drop = event.getItemDrop().getItemStack();
         removeTag(item.getItemStack());
@@ -97,6 +109,12 @@ public class EnderView implements Listener {
         item.setItemMeta(meta);
     }
 
+    /**
+     * Removes the PDC tag and lore associated with the item.
+     * If no tag is present, nothing happens.
+     *
+     * @param item The item to remove the tag from.
+     */
     private void removeTag(ItemStack item) {
         if (!isTagged(item)) return;
         ItemMeta meta = item.getItemMeta();
@@ -114,6 +132,12 @@ public class EnderView implements Listener {
         item.setItemMeta(meta);
     }
 
+    /**
+     * Returns true if the item has the PDC tag and is a shulker box.
+     *
+     * @param item The item to check.
+     * @return True if the item has the PDC tag and is a shulker box.
+     */
     private boolean isTagged(ItemStack item) {
         if (item == null) return false;
         if (!Tag.SHULKER_BOXES.isTagged(item.getType())) return false;
@@ -123,6 +147,13 @@ public class EnderView implements Listener {
         return pdc.has(this.key, PersistentDataType.BOOLEAN);
     }
 
+    /**
+     * Utility function to copy an inventory to another. If addTag is true, it will add the PDC tag to all shulker boxes, otherwise it will remove it.
+     *
+     * @param from   The inventory to copy from.
+     * @param to     The inventory to copy to.
+     * @param addTag True to add the PDC tag, false to remove it.
+     */
     private void copyInventory(Inventory from, Inventory to, boolean addTag) {
         for (int i = 0; i < from.getSize(); i++) {
             ItemStack item = from.getItem(i);
@@ -137,10 +168,20 @@ public class EnderView implements Listener {
         }
     }
 
+    /**
+     * Returns the underlying base inventory that this EnderView is based on.
+     *
+     * @return The underlying base inventory.
+     */
     public Inventory getBaseInventory() {
         return baseInv;
     }
 
+    /**
+     * Returns the resulting modified inventory that should be shown to the player.
+     *
+     * @return The resulting modified inventory.
+     */
     public Inventory getModifiedInventory() {
         return modifiedInv;
     }

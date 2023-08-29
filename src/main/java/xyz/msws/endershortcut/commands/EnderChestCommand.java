@@ -20,8 +20,7 @@ public class EnderChestCommand implements CommandExecutor {
             Lang.MUST_BE_PLAYER.send(sender);
             return true;
         }
-        if (!allowEnderChest(sender))
-            return true;
+        if (!allowEnderChest(sender)) return true;
         player.openInventory(player.getEnderChest());
         return true;
     }
@@ -36,10 +35,10 @@ public class EnderChestCommand implements CommandExecutor {
      * and a means to get it back in their inventory
      * (either an ender eye or silk touch pickaxe)
      *
-     * @param sender
-     * @param removeEye
-     * @param print
-     * @return
+     * @param sender    The sender to check
+     * @param removeEye If true, will remove an ender eye from the sender's inventory if used to open
+     * @param print     If true, will print feedback to the sender
+     * @return True if the sender can open their ender chest
      */
     private boolean allowEnderChest(CommandSender sender, boolean removeEye, boolean print) {
         if (!(sender instanceof Player player)) {
@@ -47,8 +46,7 @@ public class EnderChestCommand implements CommandExecutor {
             return false;
         }
 
-        if (player.getGameMode() == GameMode.CREATIVE)
-            return true;
+        if (player.getGameMode() == GameMode.CREATIVE) return true;
 
         if (!player.getInventory().contains(Material.ENDER_CHEST) && !sender.hasPermission("endershortcut.bypass.chest")) {
             Lang.MUST_HAVE_ENDERCHEST.send(player);
@@ -59,20 +57,25 @@ public class EnderChestCommand implements CommandExecutor {
 
         if (sender.hasPermission("endershortcut.bypass.item")) return true;
         if (!player.getInventory().contains(Material.ENDER_EYE)) {
-            if (print)
-                Lang.MUST_HAVE_EITHER.send(player);
+            if (print) Lang.MUST_HAVE_EITHER.send(player);
             return false;
         }
         if (removeEye) {
             player.getInventory().removeItem(new ItemStack(Material.ENDER_EYE, 1));
             // If we didn't remove an eye, don't show that we consumed one
-            if (print)
-                Lang.CONSUMED_EYE.send(player);
+            if (print) Lang.CONSUMED_EYE.send(player);
         }
 
         return true;
     }
 
+    /**
+     * Checks if the specified inventory has a silk touch pickaxe
+     * See {@link #hasSilkTouch(Inventory, boolean)}
+     *
+     * @param inv The inventory to check
+     * @return True if the inventory has a silk touch pickaxe
+     */
     private boolean hasSilkTouch(Inventory inv) {
         return hasSilkTouch(inv, false);
     }

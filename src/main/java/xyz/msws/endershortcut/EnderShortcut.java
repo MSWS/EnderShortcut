@@ -15,16 +15,23 @@ public class EnderShortcut extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        registerListener();
         generateFiles();
 
-        Objects.requireNonNull(getCommand("enderchest")).setExecutor(new EnderChestCommand());
+        registerListener();
+        registerCommands();
     }
 
     private void registerListener() {
         Bukkit.getPluginManager().registerEvents(new EnderOpenListener(this), this);
     }
 
+    private void registerCommands() {
+        Objects.requireNonNull(getCommand("enderchest")).setExecutor(new EnderChestCommand());
+    }
+
+    /**
+     * Generates the lang.yml parent folder and lang.yml file itself
+     */
     private void generateFiles() {
         File parent = this.getDataFolder();
         if (!parent.exists())
@@ -36,7 +43,7 @@ public class EnderShortcut extends JavaPlugin {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        YamlConfiguration lang = YamlConfiguration.loadConfiguration(langFile);
-        Lang.load(lang);
+        YamlConfiguration lang = YamlConfiguration.loadConfiguration(langFile); // Parse the file into a YamlConfiguration
+        Lang.load(lang); // Load the Configuration's values
     }
 }

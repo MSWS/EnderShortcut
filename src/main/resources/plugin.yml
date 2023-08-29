@@ -12,3 +12,17 @@ commands:
     aliases:
       - ec
       - echest
+permissions:
+  endershortcut.enderchest:
+    description: Allows the player to use /ec
+    default: true
+  endershortcut.bypass:
+    description: Allows the player to bypass the cooldown
+    default: op
+    children:
+      endershortcut.bypass.chest: true
+      endershortcut.bypass.anysilk: true
+      endershortcut.bypass.item: true
+    endershortcut.shulker:
+      description: Allows the player to open shulker boxes within their enderchest
+      default: true

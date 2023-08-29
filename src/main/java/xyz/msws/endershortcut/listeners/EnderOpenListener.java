@@ -12,8 +12,14 @@ import xyz.msws.endershortcut.EnderView;
 import java.util.HashSet;
 import java.util.UUID;
 
+/**
+ * Responsible for listening for when a player opens their enderchest.
+ * Conveniently, this catches when player#openInventory is called as well.
+ */
 public class EnderOpenListener implements Listener {
     private final Plugin plugin;
+
+    // Used to prevent infinite recursion
     private final HashSet<UUID> openingOriginalInventory = new HashSet<>();
 
     public EnderOpenListener(Plugin plugin) {
@@ -24,11 +30,12 @@ public class EnderOpenListener implements Listener {
     public void onOpen(InventoryOpenEvent event) {
         HumanEntity player = event.getPlayer();
         if (event.getView().getType() != InventoryType.ENDER_CHEST) return;
-        if (!player.hasPermission("endershortcut.shulker")) return;
+        if (!player.hasPermission("endershortcut.shulker"))
+            return; // If the player doesn't have permission to open shulkers, we don't need to do anything
         if (openingOriginalInventory.contains(player.getUniqueId())) return;
         EnderView view = new EnderView(plugin, player.getEnderChest());
         openingOriginalInventory.add(player.getUniqueId());
-        new BukkitRunnable() {
+        new BukkitRunnable() { // Delay by 1 tick cause Minecraft is minecraft
             @Override
             public void run() {
                 player.openInventory(view.getModifiedInventory());
