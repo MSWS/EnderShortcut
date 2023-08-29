@@ -36,7 +36,7 @@ jobs:
 
       - name: Get version from pom.xml
         id: get_version
-        run: echo ::set-output name=version::$(xmlstarlet sel -t -v "project/version" pom.xml)
+        run: echo ::set-output name=version::$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
 
       - name: Check if release already exists
         id: check_release
