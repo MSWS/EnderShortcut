@@ -57,6 +57,7 @@ jobs:
         with:
           tag_name: ${{ steps.get_current_tag.outputs.tag }}
           release_name: Release ${{ steps.get_current_tag.outputs.tag }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           draft: false
           prerelease: false
 
