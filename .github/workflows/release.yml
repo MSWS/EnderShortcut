@@ -30,12 +30,8 @@ jobs:
 
       - name: Generate release notes
         run: |
-          if git rev-parse --verify $LATEST_SHA > /dev/null 2>&1; then
-            NOTES=$(git log --pretty=format:'- %s' $LATEST_SHA..HEAD)
-            echo "NOTES=$NOTES" >> $GITHUB_ENV
-          else
-            echo "NOTES=No previous release found or invalid SHA. Proceeding without generating notes." >> $GITHUB_ENV
-          fi
+          NOTES=$(git log --pretty=format:'- %s' $LATEST_SHA..HEAD)
+          echo "NOTES=$NOTES" >> $GITHUB_ENV
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
