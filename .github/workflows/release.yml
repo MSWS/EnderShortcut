@@ -2,12 +2,18 @@ name: Maven Build and Release
 
 on:
   push:
+    branches:
+      - main
     tags:
       - '*'
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout code
@@ -26,30 +32,44 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
+      - name: Extract version from pom.xml
+        run: echo "VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)" >> $GITHUB_ENV
+
       - name: Build with Maven
         run: mvn clean package
 
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+      - name: Check if release exists
+        id: check_release
+        run: |
+          HTTP_CODE=$(curl -o /dev/null -s -w "%{http_code}\n" \
+                          -H "Authorization: Bearer ${{ env.GITHUB_TOKEN }}" \
+                          "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.VERSION }}")
+          if [[ "$HTTP_CODE" -eq 200 ]]; then
+            echo "Release already exists, skipping..."
+            echo "RELEASE_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "Release does not exist, creating..."
+            echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
+          fi
+
 
       - name: Create GitHub Release
         id: create_release
+        if: env.RELEASE_EXISTS == 'false'
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ steps.get_version.outputs.VERSION }}
-          release_name: Release ${{ steps.get_version.outputs.VERSION }}
-          body: Release of version ${{ steps.get_version.outputs.VERSION }}
+          tag_name: ${{ env.VERSION }}
+          release_name: Release ${{ env.VERSION }}
+          body: Release of version ${{ env.VERSION }}
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Release Asset
         id: upload_release_asset
+        if: env.RELEASE_EXISTS == 'false'
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./target/EnderShortcut.jar
+          asset_path: ./target/EnderShortcut-${{ env.VERSION }}.jar
           asset_name: EnderShortcut.jar
           asset_content_type: application/java-archive
