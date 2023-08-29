@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - main
-    tags:
-      - '*'
 
 jobs:
   build:
@@ -18,8 +16,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Fetch all branches
-        run: git fetch origin '+refs/heads/*:refs/remotes/origin/*'
 
       - name: Get latest release info
         run: |
@@ -29,9 +25,6 @@ jobs:
           echo "LATEST_SHA=$LATEST_SHA" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Validate SHA
-        run: git rev-parse --verify ${{ env.LATEST_SHA }} || echo "Invalid SHA. Proceeding without generating notes."
 
       - name: Generate release notes
         run: |
