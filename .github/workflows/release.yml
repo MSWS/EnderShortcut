@@ -34,14 +34,14 @@ jobs:
       - name: Set up Git
         run: git config --global user.name "GitHub Actions" && git config --global user.email "actions@github.com"
 
-      - name: Get current tag
-        id: get_current_tag
-        run: echo ::set-output name=tag::$(git describe --tags --abbrev=0 --exact-match HEAD || echo "")
+      - name: Get version from pom.xml
+        id: get_version
+        run: echo ::set-output name=version::$(xmlstarlet sel -t -v "project/version" pom.xml)
 
       - name: Check if release already exists
         id: check_release
         run: |
-          release_exists=$(curl -s -o /dev/null -w "%{http_code}" -X GET -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.get_current_tag.outputs.tag }}")
+          release_exists=$(curl -s -o /dev/null -w "%{http_code}" -X GET -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.get_version.outputs.tag }}")
           if [ $release_exists -eq 200 ]; then
             echo "Release already exists"
             echo ::set-output name=exists::true
@@ -57,8 +57,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.get_current_tag.outputs.tag }}
-          release_name: Release ${{ steps.get_current_tag.outputs.tag }}
+          tag_name: ${{ steps.get_version.outputs.tag }}
+          release_name: Release ${{ steps.get_version.outputs.tag }}
           draft: false
           prerelease: false
 
