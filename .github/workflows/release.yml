@@ -11,80 +11,58 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up JDK
+      - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: 17
+          java-version: '17'
           distribution: 'oracle'
 
       - name: Build JAR
         run: mvn package
 
   release:
-    name: Create Release
+    name: Create GitHub Release
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Git credentials
-        run: git config --global user.email "actions@example.com" && git config --global user.name "GitHub Actions"
+      - name: Set up Git
+        run: git config --global user.name "GitHub Actions" && git config --global user.email "actions@github.com"
 
-      - name: Get Maven Project Version
-        id: get_version
-        run: echo "::set-output name=version::$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+      - name: Get current tag
+        id: get_current_tag
+        run: echo ::set-output name=tag::$(git describe --tags --abbrev=0 --exact-match HEAD || echo "")
 
-      - name: Determine if release needs to be created
+      - name: Check if release already exists
         id: check_release
         run: |
-          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          project_version=${{ steps.get_version.outputs.version }}
-          
-          if [ "$latest_tag" != "$project_version" ]; then
-            echo "::set-output name=should_create_release::true"
+          release_exists=$(curl -s -o /dev/null -w "%{http_code}" -X GET -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.get_current_tag.outputs.tag }}")
+          if [ $release_exists -eq 200 ]; then
+            echo "Release already exists"
+            echo ::set-output name=exists::true
           else
-            echo "::set-output name=should_create_release::false"
+            echo "Release does not exist"
+            echo ::set-output name=exists::false
           fi
 
-      - name: Create GitHub Release
-        if: steps.check_release.outputs.should_create_release == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          release_title="Release $(date +'%Y-%m-%d %H:%M:%S')"
-          project_version=${{ steps.get_version.outputs.version }}
-          
-          echo "Creating release with title: $release_title"
-          
-          # Create the release using GitHub API
-          response=$(curl -s --request POST \
-            --url "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" \
-            --header "Authorization: Bearer ${GITHUB_TOKEN}" \
-            --data '{
-              "tag_name": "'"${project_version}"'",
-              "target_commitish": "main",
-              "name": "'"${release_title}"'",
-              "draft": false,
-              "prerelease": false
-            }')
-          
-          echo "Release response: $response"
-          jar_filename="target/EnderShortcut-${project_version}.jar"
-          echo "Uploading JAR asset: $jar_filename"
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        if: steps.check_release.outputs.exists == 'false'
+        with:
+          tag_name: ${{ steps.get_current_tag.outputs.tag }}
+          release_name: Release ${{ steps.get_current_tag.outputs.tag }}
+          draft: false
+          prerelease: false
 
-          upload_url="https://uploads.github.com/repos/${GITHUB_REPOSITORY}/releases/${release_id}/assets?name=${jar_filename}"
-          curl -s -X POST \
-          --url "$upload_url" \
-          --header "Authorization: Bearer ${GITHUB_TOKEN}" \
-          --header "Content-Type: $(file -b --mime-type $jar_filename)" \
-          --data-binary "@$jar_filename"
-  
-          echo "JAR asset uploaded"
+      - name: Upload JAR
+        uses: actions/upload-artifact@v2
+        if: steps.check_release.outputs.exists == 'false'
+        with:
+          name: jar
+          path: target/EnderShortcut*.jar
