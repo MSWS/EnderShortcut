@@ -27,6 +27,8 @@ jobs:
     name: Create Release
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      content: write
 
     steps:
       - name: Checkout Repository
