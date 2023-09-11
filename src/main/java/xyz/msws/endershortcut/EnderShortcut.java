@@ -85,14 +85,20 @@ public class EnderShortcut extends JavaPlugin implements EnderShortcutPlugin {
             return false;
         }
 
-        if (player.getGameMode() == GameMode.CREATIVE) return true;
+        if (player.getGameMode() == GameMode.CREATIVE) {
+            if (print) Sounds.OPEN_ENDER_CHEST.playSound(player);
+            return true;
+        }
 
         if (!player.getInventory().contains(Material.ENDER_CHEST) && !sender.hasPermission(Perm.BYPASS_CHEST.getPermission())) {
             Lang.MUST_HAVE_ENDERCHEST.send(player);
             return false;
         }
 
-        if (hasSilkTouch(player.getInventory(), sender.hasPermission(Perm.BYPASS_ANYSILK.getPermission()))) return true;
+        if (hasSilkTouch(player.getInventory(), sender.hasPermission(Perm.BYPASS_ANYSILK.getPermission()))) {
+            if (print) Sounds.OPEN_ENDER_CHEST.playSound(player);
+            return true;
+        }
 
         if (sender.hasPermission(Perm.BYPASS_ITEM.getPermission())) return true;
         if (!player.getInventory().contains(Material.ENDER_EYE)) {
@@ -106,8 +112,7 @@ public class EnderShortcut extends JavaPlugin implements EnderShortcutPlugin {
                 Lang.CONSUMED_EYE.send(player);
                 Sounds.USE_ENDER_EYE.playSound(player);
             }
-        }
-
+        } else if (print) Sounds.OPEN_ENDER_CHEST.playSound(player);
         return true;
     }
 

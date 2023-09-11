@@ -9,7 +9,8 @@ import org.bukkit.entity.Player;
 public enum Sounds {
     USE_ENDER_EYE(Sound.ENTITY_ENDERMAN_TELEPORT, SoundCategory.BLOCKS, 1, 2),
     OPEN_SHULKER_BOX(Sound.BLOCK_SHULKER_BOX_OPEN, SoundCategory.BLOCKS, 1, 1),
-    CLOSE_SHULKER_BOX(Sound.BLOCK_SHULKER_BOX_CLOSE, SoundCategory.BLOCKS, 1, 1);
+    CLOSE_SHULKER_BOX(Sound.BLOCK_SHULKER_BOX_CLOSE, SoundCategory.BLOCKS, 1, 1),
+    OPEN_ENDER_CHEST(Sound.BLOCK_ENDER_CHEST_OPEN, SoundCategory.BLOCKS, 1, 1);
 
     private Sound bukkitSound;
     private SoundCategory category;
@@ -117,4 +118,4 @@ public enum Sounds {
         section.set("Volume", sound.volume);
         section.set("Pitch", sound.pitch);
     }
-}
+    }
