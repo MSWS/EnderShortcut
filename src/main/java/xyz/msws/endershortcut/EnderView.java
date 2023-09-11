@@ -1,9 +1,6 @@
 package xyz.msws.endershortcut;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Tag;
+import org.bukkit.*;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
@@ -32,7 +29,7 @@ import java.util.List;
  * Used to lore-ize shulker boxes and allow them to be opened by right clicking.
  * Automatically registers listeners upon initialization and unregisters listeners when the inventory is closed.
  */
-public class EnderView implements Listener {
+public class EnderView implements Listener, EnderTagger {
     private final Inventory baseInv, modifiedInv;
 
     /**
@@ -91,10 +88,31 @@ public class EnderView implements Listener {
         new ShulkerLinkListener(plugin, item, player, event.getSlot());
     }
 
-    private void addTag(ItemStack item) {
-        if (isTagged(item) || !Tag.SHULKER_BOXES.isTagged(item.getType())) return;
+    @Override
+    public boolean canTag(Material material) {
+        return Tag.SHULKER_BOXES.isTagged(material);
+    }
+
+    /**
+     * Returns true if the item has the PDC tag and is a shulker box.
+     *
+     * @param item The item to check.
+     * @return True if the item has the PDC tag and is a shulker box.
+     */
+    public boolean isTagged(ItemStack item) {
+        if (item == null) return false;
+        if (!canTag(item)) return false;
         ItemMeta meta = item.getItemMeta();
-        if (meta == null) return;
+        if (meta == null) return false;
+        PersistentDataContainer pdc = meta.getPersistentDataContainer();
+        return pdc.has(this.key, PersistentDataType.BOOLEAN);
+    }
+
+    @Override
+    public boolean tag(ItemStack item) {
+        if (isTagged(item) || !canTag(item)) return false;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return false;
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
 
         List<String> lore = meta.getLore();
@@ -107,20 +125,16 @@ public class EnderView implements Listener {
         pdc.set(this.key, PersistentDataType.BOOLEAN, true);
 
         item.setItemMeta(meta);
+        return true;
     }
 
-    /**
-     * Removes the PDC tag and lore associated with the item.
-     * If no tag is present, nothing happens.
-     *
-     * @param item The item to remove the tag from.
-     */
-    private void removeTag(ItemStack item) {
-        if (!isTagged(item)) return;
+    @Override
+    public boolean untag(ItemStack item) {
+        if (!isTagged(item)) return false;
         ItemMeta meta = item.getItemMeta();
-        if (meta == null) return;
+        if (meta == null) return false;
         List<String> lore = meta.getLore();
-        if (lore == null) return;
+        if (lore == null) return false;
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
         String toRemove = Lang.ITEM_CTRL_CLICK.getValue().toString();
         for (String line : toRemove.split("\n"))
@@ -130,21 +144,7 @@ public class EnderView implements Listener {
         pdc.remove(this.key);
 
         item.setItemMeta(meta);
-    }
-
-    /**
-     * Returns true if the item has the PDC tag and is a shulker box.
-     *
-     * @param item The item to check.
-     * @return True if the item has the PDC tag and is a shulker box.
-     */
-    private boolean isTagged(ItemStack item) {
-        if (item == null) return false;
-        if (!Tag.SHULKER_BOXES.isTagged(item.getType())) return false;
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return false;
-        PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        return pdc.has(this.key, PersistentDataType.BOOLEAN);
+        return true;
     }
 
     /**
@@ -162,8 +162,8 @@ public class EnderView implements Listener {
                 continue;
             }
             ItemStack clone = item.clone();
-            if (addTag) addTag(clone);
-            else removeTag(clone);
+            if (addTag && canTag(clone)) tag(clone);
+            else untag(clone);
             to.setItem(i, clone);
         }
     }
