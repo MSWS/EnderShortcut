@@ -3,17 +3,20 @@ package xyz.msws.endershortcut.listeners;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import xyz.msws.endershortcut.EnderTagger;
 
-public class PickupEnderChestListener extends EnderTagger implements Listener {
+public class ObtainEnderChestListener extends EnderTagger implements Listener {
 
-    public PickupEnderChestListener(Plugin plugin) {
+    public ObtainEnderChestListener(Plugin plugin) {
         super(new NamespacedKey(plugin, "endershortcut-tag-enderchest"));
     }
 
@@ -28,16 +31,30 @@ public class PickupEnderChestListener extends EnderTagger implements Listener {
             return;
         player.sendMessage("Picked up");
         ItemStack item = event.getItem().getItemStack();
-        if (!canTag(item))
-            return;
         tag(item);
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        for (ItemStack item : player.getInventory().getContents())
+            tag(item);
+    }
+
+    @EventHandler
+    public void onCreative(InventoryCreativeEvent event) {
+        HumanEntity player = event.getWhoClicked();
+        ItemStack item = event.getCurrentItem();
+        if (item != null && !item.getType().isAir())
+            tag(item);
+        item = event.getCursor();
+        if (!item.getType().isAir())
+            tag(item);
     }
 
     @EventHandler
     public void onDrop(PlayerDropItemEvent event) {
         ItemStack item = event.getItemDrop().getItemStack();
-        if (!isTagged(item))
-            return;
         untag(item);
     }
 }

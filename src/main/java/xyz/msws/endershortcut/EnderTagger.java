@@ -31,6 +31,8 @@ public abstract class EnderTagger {
      * @see #canTag(Material)
      */
     public boolean canTag(ItemStack item) {
+        if (item == null)
+            return false;
         return canTag(item.getType());
     }
 
