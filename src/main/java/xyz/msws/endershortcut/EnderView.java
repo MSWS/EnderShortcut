@@ -60,7 +60,7 @@ public class EnderView implements Listener, EnderTagger {
         // Dropping an item directly from the enderchest
         Item item = event.getItemDrop();
         ItemStack drop = event.getItemDrop().getItemStack();
-        removeTag(item.getItemStack());
+        untag(item.getItemStack());
     }
 
     @EventHandler
