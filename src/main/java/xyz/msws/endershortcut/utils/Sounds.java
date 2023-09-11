@@ -86,7 +86,10 @@ public enum Sounds {
         if (soundsSection == null) soundsSection = sounds.createSection("Sounds");
         for (Sounds sound : Sounds.values()) {
             ConfigurationSection section = soundsSection.getConfigurationSection(sound.toString());
-            if (section == null) section = soundsSection.createSection(sound.toString());
+            if (section == null) {
+                section = soundsSection.createSection(sound.toString());
+                populate(section, sound);
+            }
 
             sound.setSound(section.getString("Sound", sound.bukkitSound.toString()));
             sound.setCategory(SoundCategory.valueOf(section.getString("Category", sound.category.toString())));
