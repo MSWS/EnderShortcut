@@ -31,10 +31,11 @@ in their enderchest. (Requires `endershortcut.shulker` permissions).
 
 ## Permissions
 
-| Permission                     | Description                                                                                  |
-|--------------------------------|----------------------------------------------------------------------------------------------|
-| `endershortcut.enderchest`     | Grants basic access to the `/enderchest` command.                                            |
-| `endershortcut.bypass.chest`   | Grants access to the `enderchest` command even if the player does not have an Ender Chest.   |
-| `endershortcut.bypass.anysilk` | Grants access to the `enderchest` command if any item the player's inventory has silk touch. | 
-| `endershortcut.bypass.item`    | Grants access to the `enderchest` command even if the player does not have a required item.  |
-| `endershortcut.shulker`        | Grants access to open shulker boxes within their enderchest.                                 |   
+| Permission                     | Description                                                                                     |
+|--------------------------------|-------------------------------------------------------------------------------------------------|
+| `endershortcut.enderchest`     | Grants basic access to the `/enderchest` command.                                               |
+| `endershortcut.bypass.chest`   | Grants access to the `enderchest` command even if the player does not have an Ender Chest.      |
+| `endershortcut.bypass.anysilk` | Grants access to the `enderchest` command if any item the player's inventory has silk touch.    | 
+| `endershortcut.bypass.item`    | Grants access to the `enderchest` command even if the player does not have a required item.     |
+| `endershortcut.shulker`        | Grants access to open shulker boxes within their enderchest.                                    |
+| `endershortcut.backpack`       | Grants access to open the enderchest within their own inventory without having to place it down |

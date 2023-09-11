@@ -1,12 +1,13 @@
-package xyz.msws.endershortcut;
+package xyz.msws.endershortcut.listeners;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
@@ -18,40 +19,30 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
-import xyz.msws.endershortcut.listeners.ShulkerLinkListener;
-import xyz.msws.endershortcut.utils.Lang;
-
-import java.util.ArrayList;
-import java.util.List;
+import xyz.msws.endershortcut.EnderTagger;
+import xyz.msws.endershortcut.utils.Sounds;
 
 /**
  * Represents a modified view of a player's enderchest.
  * Used to lore-ize shulker boxes and allow them to be opened by right clicking.
  * Automatically registers listeners upon initialization and unregisters listeners when the inventory is closed.
  */
-public class EnderView implements Listener {
+public class ViewEnderChestListener extends EnderTagger implements Listener {
     private final Inventory baseInv, modifiedInv;
-
-    /**
-     * Used to identify shulker boxes that have been modified by this plugin.
-     */
-    private final NamespacedKey key;
     private final Plugin plugin;
 
     /**
-     * Creates a new EnderView.
+     * Creates a new ViewEnderChestListener.
      *
      * @param plugin  The plugin to register listeners to.
      * @param baseInv The player's enderchest inventory.
      */
-    public EnderView(Plugin plugin, Inventory baseInv) {
+    public ViewEnderChestListener(Plugin plugin, Inventory baseInv) {
+        super(new NamespacedKey(plugin, "endershortcut-tag-shulker"));
         this.plugin = plugin;
         this.baseInv = baseInv;
         this.modifiedInv = Bukkit.createInventory(baseInv.getHolder(), InventoryType.ENDER_CHEST, "Ender Chest");
-        this.key = new NamespacedKey(plugin, "endershortcut-tag");
 
         copyInventory(baseInv, modifiedInv, true);
 
@@ -63,7 +54,7 @@ public class EnderView implements Listener {
         // Dropping an item directly from the enderchest
         Item item = event.getItemDrop();
         ItemStack drop = event.getItemDrop().getItemStack();
-        removeTag(item.getItemStack());
+        untag(item.getItemStack());
     }
 
     @EventHandler
@@ -84,67 +75,19 @@ public class EnderView implements Listener {
         HumanEntity player = event.getWhoClicked();
         ItemStack item = event.getCurrentItem();
         if (!isTagged(item)) return;
+        assert item != null;
         ItemMeta meta = item.getItemMeta();
         BlockStateMeta bsm = (BlockStateMeta) meta;
         if (!(bsm.getBlockState() instanceof ShulkerBox shulker)) return;
         player.openInventory(shulker.getInventory());
+        if (player instanceof Player hearer)
+            Sounds.OPEN_SHULKER_BOX.playSound(hearer);
         new ShulkerLinkListener(plugin, item, player, event.getSlot());
     }
 
-    private void addTag(ItemStack item) {
-        if (isTagged(item) || !Tag.SHULKER_BOXES.isTagged(item.getType())) return;
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return;
-        PersistentDataContainer pdc = meta.getPersistentDataContainer();
-
-        List<String> lore = meta.getLore();
-        if (lore == null) lore = new ArrayList<>();
-        String toAdd = Lang.ITEM_CTRL_CLICK.getValue().toString();
-        for (String line : toAdd.split("\n"))
-            lore.add(ChatColor.translateAlternateColorCodes('&', line));
-        meta.setLore(lore);
-
-        pdc.set(this.key, PersistentDataType.BOOLEAN, true);
-
-        item.setItemMeta(meta);
-    }
-
-    /**
-     * Removes the PDC tag and lore associated with the item.
-     * If no tag is present, nothing happens.
-     *
-     * @param item The item to remove the tag from.
-     */
-    private void removeTag(ItemStack item) {
-        if (!isTagged(item)) return;
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return;
-        List<String> lore = meta.getLore();
-        if (lore == null) return;
-        PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        String toRemove = Lang.ITEM_CTRL_CLICK.getValue().toString();
-        for (String line : toRemove.split("\n"))
-            lore.remove(ChatColor.translateAlternateColorCodes('&', line));
-        meta.setLore(lore);
-
-        pdc.remove(this.key);
-
-        item.setItemMeta(meta);
-    }
-
-    /**
-     * Returns true if the item has the PDC tag and is a shulker box.
-     *
-     * @param item The item to check.
-     * @return True if the item has the PDC tag and is a shulker box.
-     */
-    private boolean isTagged(ItemStack item) {
-        if (item == null) return false;
-        if (!Tag.SHULKER_BOXES.isTagged(item.getType())) return false;
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null) return false;
-        PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        return pdc.has(this.key, PersistentDataType.BOOLEAN);
+    @Override
+    public boolean canTag(Material material) {
+        return Tag.SHULKER_BOXES.isTagged(material);
     }
 
     /**
@@ -162,14 +105,14 @@ public class EnderView implements Listener {
                 continue;
             }
             ItemStack clone = item.clone();
-            if (addTag) addTag(clone);
-            else removeTag(clone);
+            if (addTag && canTag(clone)) tag(clone);
+            else untag(clone);
             to.setItem(i, clone);
         }
     }
 
     /**
-     * Returns the underlying base inventory that this EnderView is based on.
+     * Returns the underlying base inventory that this ViewEnderChestListener is based on.
      *
      * @return The underlying base inventory.
      */
