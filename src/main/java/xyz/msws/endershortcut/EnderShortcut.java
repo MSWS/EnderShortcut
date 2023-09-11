@@ -5,6 +5,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import xyz.msws.endershortcut.commands.EnderChestCommand;
 import xyz.msws.endershortcut.listeners.EnderOpenListener;
+import xyz.msws.endershortcut.listeners.PickupEnderChestListener;
 import xyz.msws.endershortcut.utils.Lang;
 
 import java.io.File;
@@ -23,6 +24,7 @@ public class EnderShortcut extends JavaPlugin {
 
     private void registerListener() {
         Bukkit.getPluginManager().registerEvents(new EnderOpenListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new PickupEnderChestListener(this), this);
     }
 
     private void registerCommands() {
