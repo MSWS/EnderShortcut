@@ -43,7 +43,7 @@ public class InventoryClickListener implements Listener {
             @Override
             public void run() {
                 player.openInventory(player.getEnderChest());
-                if (event.getView().getType() != InventoryType.CRAFTING)
+                if (event.getView().getType() != InventoryType.CRAFTING && player.getOpenInventory().getType() != InventoryType.CREATIVE)
                     // We can't force players to re-open their inventory
                     new BukkitRunnable() {
                         @Override
@@ -65,7 +65,7 @@ public class InventoryClickListener implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (player.getOpenInventory().getType() != InventoryType.CRAFTING)
+                if (player.getOpenInventory().getType() != InventoryType.CRAFTING && player.getOpenInventory().getType() != InventoryType.CREATIVE)
                     // Player didn't actually close out of the inventory
                     // This can happen if they were in a shulker box from their inventory
                     return;
