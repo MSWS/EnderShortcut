@@ -12,6 +12,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.msws.endershortcut.api.EnderShortcutPlugin;
+import xyz.msws.endershortcut.utils.Perm;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,16 +28,17 @@ public class InventoryClickListener implements Listener {
 
     @EventHandler
     public void onClick(InventoryClickEvent event) {
-        if (event.getClick() != ClickType.RIGHT)
-            return;
+        if (event.getClick() != ClickType.RIGHT) return;
         HumanEntity player = event.getWhoClicked();
         ItemStack item = event.getCurrentItem();
-        if (item == null || item.getType().isAir() || item.getType() != Material.ENDER_CHEST)
-            return;
-        if (!plugin.getChestTagger().isTagged(item))
-            return;
-
+        if (item == null || item.getType().isAir() || item.getType() != Material.ENDER_CHEST) return;
+        if (!plugin.getChestTagger().isTagged(item)) return;
+        if (!player.hasPermission(Perm.EC_BACKPACK.getPermission())) return;
+        if (event.getView().getType() == InventoryType.ENDER_CHEST) return; // Already viewing ender chest
         event.setCancelled(true);
+
+        if (!plugin.allowEnderChest(player)) return;
+
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -58,16 +60,17 @@ public class InventoryClickListener implements Listener {
     public void onClose(InventoryCloseEvent event) {
         HumanEntity player = event.getPlayer();
         InventoryView original = originalView.get(player.getUniqueId());
-        if (original == null)
-            return;
+        if (original == null) return;
 
-//        player.sendMessage("Removing original view type " + original.getType() + " your new view is " + player.getOpenInventory().getType());
         new BukkitRunnable() {
             @Override
             public void run() {
                 if (player.getOpenInventory().getType() != InventoryType.CRAFTING)
                     // Player didn't actually close out of the inventory
                     // This can happen if they were in a shulker box from their inventory
+                    return;
+                if (event.getView().getType() == InventoryType.SHULKER_BOX)
+                    // They were viewing a shulker box, so don't re-open the original as we go back to their ender chest
                     return;
                 originalView.remove(player.getUniqueId());
                 player.openInventory(original);

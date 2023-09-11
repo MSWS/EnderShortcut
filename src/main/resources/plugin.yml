@@ -23,6 +23,9 @@ permissions:
       endershortcut.bypass.chest: true
       endershortcut.bypass.anysilk: true
       endershortcut.bypass.item: true
-    endershortcut.shulker:
-      description: Allows the player to open shulker boxes within their enderchest
-      default: true
+  endershortcut.shulker:
+    description: Allows the player to open shulker boxes within their enderchest
+    default: true
+  endershortcut.backpack:
+    description: Allows the player to open an enderchest in their inventory
+    default: true

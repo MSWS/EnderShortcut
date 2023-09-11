@@ -10,19 +10,17 @@ import java.io.File;
  * An enum to keep track of messages.
  */
 public enum Lang {
-    PREFIX("Prefix", "&9EnderShortcut&7>"),
-    MUST_BE_PLAYER("MustBePlayer", "%prefix% You must be a player to run this command."),
-    MUST_HAVE_ENDERCHEST("MustHaveEnderchest", "%prefix% You must have an enderchest in your inventory to run this command."),
-    MUST_HAVE_EITHER("MustHaveEither", "%prefix% You must have either an eye of ender or a silk touch pickaxe to run this command."),
-    CONSUMED_EYE("ConsumedEye", "%prefix% You consumed an eye of ender to open your enderchest."),
-    ITEM_RIGHT_CLICK("ItemRightClick", "&7Right-Click to open.");
+    PREFIX("&9EnderShortcut>&7"),
+    MUST_BE_PLAYER("%prefix% You must be a player to run this command."),
+    MUST_HAVE_ENDERCHEST("%prefix% You must have an enderchest in your inventory to run this command."),
+    MUST_HAVE_EITHER("%prefix% You must have either an eye of ender or a silk touch pickaxe to run this command."),
+    CONSUMED_EYE("%prefix% You consumed an eye of ender to open your enderchest."),
+    ITEM_RIGHT_CLICK("&7Right-Click to open.");
 
-    private final String key;
     private final Object def;
     private Object value;
 
-    Lang(String key, Object value) {
-        this.key = key;
+    Lang(Object value) {
         this.value = value;
         this.def = value;
     }
@@ -39,18 +37,19 @@ public enum Lang {
         return def;
     }
 
-    public String getKey() {
-        return key;
-    }
-
     /**
      * Overrides all current values from the specified config
      *
      * @param lang
      */
     public static void load(YamlConfiguration lang) {
-        for (Lang l : Lang.values())
-            l.setValue(lang.get(l.getKey(), l.getValue()));
+        for (Lang l : Lang.values()) {
+            if (!lang.contains(l.toString())) { // If the config doesn't contain the value, add it
+                lang.set(l.toString(), l.getDefault());
+                continue;
+            }
+            l.setValue(lang.get(l.toString(), l.getValue()));
+        }
     }
 
     /**
@@ -71,7 +70,7 @@ public enum Lang {
      */
     public static void populate(YamlConfiguration config) {
         for (Lang l : Lang.values())
-            config.set(l.getKey(), l.getValue());
+            config.set(l.toString(), l.getValue());
     }
 
     /**

@@ -1,12 +1,10 @@
 package xyz.msws.endershortcut.listeners;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Tag;
+import org.bukkit.*;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
@@ -78,6 +76,8 @@ public class ViewEnderChestListener extends EnderTagger implements Listener {
         BlockStateMeta bsm = (BlockStateMeta) meta;
         if (!(bsm.getBlockState() instanceof ShulkerBox shulker)) return;
         player.openInventory(shulker.getInventory());
+        if (player instanceof Player hearer)
+            hearer.playSound(hearer.getLocation(), Sound.BLOCK_SHULKER_BOX_OPEN, SoundCategory.BLOCKS, 1, 1);
         new ShulkerLinkListener(plugin, item, player, event.getSlot());
     }
 

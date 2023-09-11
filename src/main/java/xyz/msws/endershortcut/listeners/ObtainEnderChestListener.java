@@ -7,12 +7,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import xyz.msws.endershortcut.EnderTagger;
+import xyz.msws.endershortcut.utils.Perm;
 
 public class ObtainEnderChestListener extends EnderTagger implements Listener {
 
@@ -29,7 +31,8 @@ public class ObtainEnderChestListener extends EnderTagger implements Listener {
     public void onPickup(EntityPickupItemEvent event) {
         if (!(event.getEntity() instanceof HumanEntity player))
             return;
-        player.sendMessage("Picked up");
+        if (!player.hasPermission(Perm.EC_BACKPACK.getPermission()))
+            return;
         ItemStack item = event.getItem().getItemStack();
         tag(item);
     }
@@ -56,5 +59,16 @@ public class ObtainEnderChestListener extends EnderTagger implements Listener {
     public void onDrop(PlayerDropItemEvent event) {
         ItemStack item = event.getItemDrop().getItemStack();
         untag(item);
+    }
+
+    @EventHandler
+    public void onClose(InventoryCloseEvent event) {
+        HumanEntity player = event.getPlayer();
+        for (ItemStack item : event.getInventory().getContents())
+            untag(item);
+        if (player.hasPermission(Perm.EC_BACKPACK.getPermission()))
+            return;
+        for (ItemStack item : player.getInventory().getContents())
+            untag(item);
     }
 }

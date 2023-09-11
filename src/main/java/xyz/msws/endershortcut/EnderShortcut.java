@@ -18,6 +18,8 @@ import xyz.msws.endershortcut.listeners.EnderOpenListener;
 import xyz.msws.endershortcut.listeners.InventoryClickListener;
 import xyz.msws.endershortcut.listeners.ObtainEnderChestListener;
 import xyz.msws.endershortcut.utils.Lang;
+import xyz.msws.endershortcut.utils.Perm;
+import xyz.msws.endershortcut.utils.Sounds;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,11 +39,7 @@ public class EnderShortcut extends JavaPlugin implements EnderShortcutPlugin {
 
     private void registerListener() {
         this.chestTagger = new ObtainEnderChestListener(this);
-        List<Listener> listeners = List.of(
-                new EnderOpenListener(this),
-                (Listener) this.chestTagger,
-                new InventoryClickListener(this)
-        );
+        List<Listener> listeners = List.of(new EnderOpenListener(this), (Listener) this.chestTagger, new InventoryClickListener(this));
         listeners.forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, this));
     }
 
@@ -54,17 +52,26 @@ public class EnderShortcut extends JavaPlugin implements EnderShortcutPlugin {
      */
     private void generateFiles() {
         File parent = this.getDataFolder();
-        if (!parent.exists())
-            parent.mkdirs();
+        if (!parent.exists()) parent.mkdirs();
         File langFile = new File(this.getDataFolder(), "lang.yml");
+        File configFile = new File(this.getDataFolder(), "config.yml");
         try {
-            if (langFile.createNewFile())
-                Lang.populate(langFile);
+            if (langFile.createNewFile()) Lang.populate(langFile);
+            if (configFile.createNewFile()) Sounds.populate(configFile);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         YamlConfiguration lang = YamlConfiguration.loadConfiguration(langFile); // Parse the file into a YamlConfiguration
-        Lang.load(lang); // Load the Configuration's values
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+        Lang.load(lang); // Load localization files
+        Sounds.load(config); // Load config files
+        try {
+            // After loading, we might've re-inserted defaults if they were missing, re-save
+            lang.save(langFile);
+            config.save(configFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -86,14 +93,14 @@ public class EnderShortcut extends JavaPlugin implements EnderShortcutPlugin {
 
         if (player.getGameMode() == GameMode.CREATIVE) return true;
 
-        if (!player.getInventory().contains(Material.ENDER_CHEST) && !sender.hasPermission("endershortcut.bypass.chest")) {
+        if (!player.getInventory().contains(Material.ENDER_CHEST) && !sender.hasPermission(Perm.BYPASS_CHEST.getPermission())) {
             Lang.MUST_HAVE_ENDERCHEST.send(player);
             return false;
         }
 
-        if (hasSilkTouch(player.getInventory(), sender.hasPermission("endershortcut.bypass.anysilk"))) return true;
+        if (hasSilkTouch(player.getInventory(), sender.hasPermission(Perm.BYPASS_ANYSILK.getPermission()))) return true;
 
-        if (sender.hasPermission("endershortcut.bypass.item")) return true;
+        if (sender.hasPermission(Perm.BYPASS_ITEM.getPermission())) return true;
         if (!player.getInventory().contains(Material.ENDER_EYE)) {
             if (print) Lang.MUST_HAVE_EITHER.send(player);
             return false;
@@ -101,7 +108,10 @@ public class EnderShortcut extends JavaPlugin implements EnderShortcutPlugin {
         if (removeEye) {
             player.getInventory().removeItem(new ItemStack(Material.ENDER_EYE, 1));
             // If we didn't remove an eye, don't show that we consumed one
-            if (print) Lang.CONSUMED_EYE.send(player);
+            if (print) {
+                Lang.CONSUMED_EYE.send(player);
+                Sounds.USE_ENDER_EYE.playSound(player);
+            }
         }
 
         return true;
