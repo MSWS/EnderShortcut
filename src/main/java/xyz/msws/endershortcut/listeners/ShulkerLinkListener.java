@@ -3,6 +3,7 @@ package xyz.msws.endershortcut.listeners;
 import org.bukkit.Bukkit;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -10,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
+import xyz.msws.endershortcut.utils.Sounds;
 
 /**
  * Responsible for linking a shulker box item to the player's inventory when editing that item.
@@ -48,6 +50,8 @@ public class ShulkerLinkListener implements Listener {
         BlockStateMeta bsm = (BlockStateMeta) meta;
         bsm.setBlockState(shulker);
         item.setItemMeta(bsm);
+
+        if (player instanceof Player hearer) Sounds.CLOSE_SHULKER_BOX.playSound(hearer);
 
         // We've updated the item, so we need to re-insert it into the player's enderchest
         player.getEnderChest().setItem(slot, item);

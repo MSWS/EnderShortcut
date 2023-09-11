@@ -6,10 +6,10 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
-import java.io.File;
-
 public enum Sounds {
-    USE_ENDER_EYE(Sound.ENTITY_ENDERMAN_TELEPORT, SoundCategory.BLOCKS, 1, 2);
+    USE_ENDER_EYE(Sound.ENTITY_ENDERMAN_TELEPORT, SoundCategory.BLOCKS, 1, 2),
+    OPEN_SHULKER_BOX(Sound.BLOCK_SHULKER_BOX_OPEN, SoundCategory.BLOCKS, 1, 1),
+    CLOSE_SHULKER_BOX(Sound.BLOCK_SHULKER_BOX_CLOSE, SoundCategory.BLOCKS, 1, 1);
 
     private Sound bukkitSound;
     private SoundCategory category;
@@ -82,26 +82,17 @@ public enum Sounds {
      * @param lang
      */
     public static void load(YamlConfiguration sounds) {
+        ConfigurationSection soundsSection = sounds.getConfigurationSection("Sounds");
+        if (soundsSection == null) soundsSection = sounds.createSection("Sounds");
         for (Sounds sound : Sounds.values()) {
-            ConfigurationSection section = sounds.getConfigurationSection(sound.toString());
-            if (section == null) { // If the section doesn't exist, create it
-                populate(sounds.createSection(sound.toString()), sound);
-                continue;
-            }
+            ConfigurationSection section = soundsSection.getConfigurationSection(sound.toString());
+            if (section == null) section = soundsSection.createSection(sound.toString());
+
             sound.setSound(section.getString("Sound", sound.bukkitSound.toString()));
             sound.setCategory(SoundCategory.valueOf(section.getString("Category", sound.category.toString())));
             sound.setVolume((float) section.getDouble("Volume", sound.volume));
             sound.setPitch((float) section.getDouble("Pitch", sound.pitch));
         }
-    }
-
-    /**
-     * Populates the specified config with all the values from this enum
-     *
-     * @param config The config to populate
-     */
-    public static void populate(YamlConfiguration config) {
-        populate(config.getRoot());
     }
 
     /**
@@ -121,21 +112,5 @@ public enum Sounds {
         section.set("Category", sound.category.toString());
         section.set("Volume", sound.volume);
         section.set("Pitch", sound.pitch);
-    }
-
-    /**
-     * Populates the specified file with all the values from this enum
-     * Saves the file after populating
-     *
-     * @param file The file to populate
-     */
-    public static void populate(File file) {
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-        populate(config.createSection("Sounds"));
-        try {
-            config.save(file);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

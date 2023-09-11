@@ -55,12 +55,6 @@ public class EnderShortcut extends JavaPlugin implements EnderShortcutPlugin {
         if (!parent.exists()) parent.mkdirs();
         File langFile = new File(this.getDataFolder(), "lang.yml");
         File configFile = new File(this.getDataFolder(), "config.yml");
-        try {
-            if (langFile.createNewFile()) Lang.populate(langFile);
-            if (configFile.createNewFile()) Sounds.populate(configFile);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
         YamlConfiguration lang = YamlConfiguration.loadConfiguration(langFile); // Parse the file into a YamlConfiguration
         YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
         Lang.load(lang); // Load localization files

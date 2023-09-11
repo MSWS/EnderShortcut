@@ -1,6 +1,9 @@
 package xyz.msws.endershortcut.listeners;
 
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Tag;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
@@ -18,6 +21,7 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
 import xyz.msws.endershortcut.EnderTagger;
+import xyz.msws.endershortcut.utils.Sounds;
 
 /**
  * Represents a modified view of a player's enderchest.
@@ -77,7 +81,7 @@ public class ViewEnderChestListener extends EnderTagger implements Listener {
         if (!(bsm.getBlockState() instanceof ShulkerBox shulker)) return;
         player.openInventory(shulker.getInventory());
         if (player instanceof Player hearer)
-            hearer.playSound(hearer.getLocation(), Sound.BLOCK_SHULKER_BOX_OPEN, SoundCategory.BLOCKS, 1, 1);
+            Sounds.OPEN_SHULKER_BOX.playSound(hearer);
         new ShulkerLinkListener(plugin, item, player, event.getSlot());
     }
 
