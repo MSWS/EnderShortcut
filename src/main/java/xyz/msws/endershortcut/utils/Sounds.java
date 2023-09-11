@@ -89,6 +89,7 @@ public enum Sounds {
             if (section == null) {
                 section = soundsSection.createSection(sound.toString());
                 populate(section, sound);
+                continue;
             }
 
             sound.setSound(section.getString("Sound", sound.bukkitSound.toString()));
