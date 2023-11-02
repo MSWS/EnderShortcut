@@ -2,6 +2,8 @@
 
 Adds a _balanced_ QoL shortcut to the Ender Chest.
 
+https://youtu.be/WKFHN4lx6gg
+
 ## Primary Command: `/enderchest`
 
 Aliases: `/ec`, `/echest`
